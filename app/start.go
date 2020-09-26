@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/leiqD/go-socket5/app/socket5/launcher"
+	"github.com/leiqD/go-socket5/app/proxy/launcher"
 	"github.com/leiqD/go-socket5/infra/conf"
 	"github.com/leiqD/go-socket5/infra/logger"
 	"gorm.io/gorm"
