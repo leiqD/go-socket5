@@ -2,7 +2,7 @@ package datastore
 
 import (
 	"fmt"
-	"github.com/leiqD/go-socket5/infra/conf"
+	"github.com/leiqD/go-socket5/infrastructure/conf"
 	"gorm.io/gorm/logger"
 	"log"
 	"os"

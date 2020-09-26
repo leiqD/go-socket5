@@ -23,8 +23,8 @@ type DataStoreInfo struct {
 	Params SqlParam
 }
 type NetInfo struct {
-	Host string
-	Port string
+	Addr     string
+	Protocol string
 }
 
 type Viper struct {

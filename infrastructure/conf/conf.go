@@ -53,3 +53,8 @@ func (c *Configs) DataBase() *DataStoreInfo {
 	sql := c.Viper.DataStore
 	return &sql
 }
+
+func (c *Configs) Net() *NetInfo {
+	net := c.Viper.Net
+	return &net
+}
