@@ -6,9 +6,12 @@
 package launcher
 
 import (
-	"github.com/leiqD/go-socket5/infra/conf"
-	"github.com/leiqD/go-socket5/infra/datastore"
-	"github.com/leiqD/go-socket5/infra/logger"
+	"github.com/leiqD/go-socket5/infrastructure/conf"
+	"github.com/leiqD/go-socket5/infrastructure/datastore"
+	"github.com/leiqD/go-socket5/infrastructure/logger"
+	"github.com/leiqD/go-socket5/infrastructure/router"
+	"github.com/leiqD/go-socket5/interface/controller"
+	"github.com/leiqD/go-socket5/trans"
 	"gorm.io/gorm"
 )
 
@@ -31,4 +34,14 @@ func InitialDataStore(cfg datastore.MYSQLconfig) (*gorm.DB, error) {
 		return nil, err
 	}
 	return db, nil
+}
+
+func InitialRouter(cfg router.RouterConfig, control controller.AppController) router.Router {
+	routerRouter := router.NewRouter(cfg, control)
+	return routerRouter
+}
+
+func InitialTrans() trans.Trans {
+	transTrans := trans.NetTrans()
+	return transTrans
 }

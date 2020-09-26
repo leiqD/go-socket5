@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/leiqD/go-socket5/infra/conf"
+	"github.com/leiqD/go-socket5/infrastructure/conf"
 	"go.uber.org/zap"
 	"runtime"
 	"strings"
