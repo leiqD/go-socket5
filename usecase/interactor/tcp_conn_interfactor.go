@@ -5,16 +5,18 @@ import (
 	"github.com/leiqD/go-socket5/usecase/presenter"
 	"github.com/leiqD/go-socket5/usecase/repository"
 	"net"
+	"sync"
 	"time"
 )
 
 type ConnectId int64
 
 type tcpCtrlSession struct {
-	conn       net.Conn
-	id         ConnectId
-	updateTime int64
-	connTime   int64
+	conn              net.Conn
+	id                ConnectId
+	updateTime        int64
+	connTime          int64
+	negotiateComplete bool
 }
 
 type tcpConnInterfactor struct {
@@ -44,6 +46,7 @@ func (p *tcpConnInterfactor) NewTcpSession(conn net.Conn) *tcpCtrlSession {
 		updateTime: time.Now().Unix(),
 	}
 	s.conn.SetReadDeadline(time.Now().Add(1 * time.Second))
+	s.negotiateComplete = false
 	return &s
 }
 
@@ -58,8 +61,18 @@ func (p *tcpConnInterfactor) Close(conn net.Conn) {
 }
 
 func (p *tcpConnInterfactor) NegotiateSocket5() error {
+	wg := sync.WaitGroup{}
 	for _, session := range p.TcpSession {
-
+		wg.Add(1)
+		go func() {
+			p.negotiateSocket5(session)
+			wg.Done()
+		}()
 	}
+	wg.Wait()
 	return nil
+}
+
+func (p *tcpConnInterfactor) negotiateSocket5(session *tcpCtrlSession) {
+	// Todo negotiateSocket5
 }
