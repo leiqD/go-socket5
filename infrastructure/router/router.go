@@ -50,12 +50,17 @@ func (p *router) Start() error {
 		}
 		logger.Info("start tcp server success ")
 		p.listen = listen
+		p.Run()
 	}
 	return nil
 }
 
 func (p *router) Run() {
-	p.accept()
+	go func() {
+		for {
+			p.accept()
+		}
+	}()
 }
 
 func (p *router) accept() {

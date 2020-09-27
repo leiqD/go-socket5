@@ -16,8 +16,8 @@
     }
   },
   "Net": {
-    "addr": "localhost",
-    "port": 8000
+    "addr": "192.168.1.4:8080",
+    "Protocol": "tcp"
   }
 
 }
