@@ -72,5 +72,5 @@ func (p *router) accept() {
 }
 
 func (p *router) newSession(conn net.Conn) {
-	p.contron.Negotiate.NewSession(conn)
+	p.contron.Connect.NewSession(conn)
 }

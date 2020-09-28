@@ -1,5 +1,6 @@
 package controller
 
 type AppController struct {
-	Negotiate interface{ TcpConnController }
+	Connect     interface{ TcpConnController }
+	Negotiation interface{ CtrlSessionController }
 }

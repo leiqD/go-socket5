@@ -11,8 +11,7 @@ type tcpConnController struct {
 
 type TcpConnController interface {
 	NewSession(conn net.Conn)
-	NegotiateSocket5() error
-	Stop()
+	GetConnActor() interactor.TcpConnInterfactor
 }
 
 func NewTcpConnController(us interactor.TcpConnInterfactor) TcpConnController {
@@ -22,14 +21,9 @@ func NewTcpConnController(us interactor.TcpConnInterfactor) TcpConnController {
 }
 
 func (p *tcpConnController) NewSession(conn net.Conn) {
-	//p.tcpConn.Connect(conn)
 	p.connInterfactor.Connect(conn)
 }
 
-func (p *tcpConnController) NegotiateSocket5() error {
-	return p.connInterfactor.NegotiateSocket5()
-}
-
-func (p *tcpConnController) Stop() {
-
+func (p *tcpConnController) GetConnActor() interactor.TcpConnInterfactor {
+	return p.connInterfactor
 }

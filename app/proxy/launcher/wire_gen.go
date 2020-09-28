@@ -12,6 +12,7 @@ import (
 	"github.com/leiqD/go-socket5/infrastructure/router"
 	"github.com/leiqD/go-socket5/interface/controller"
 	"github.com/leiqD/go-socket5/trans"
+	"github.com/leiqD/go-socket5/usecase/interactor"
 	"gorm.io/gorm"
 )
 
@@ -44,4 +45,9 @@ func InitialRouter(cfg router.RouterConfig, control controller.AppController) ro
 func InitialTrans() trans.Trans {
 	transTrans := trans.NetTrans()
 	return transTrans
+}
+
+func InitialCtrlSessionControl(session interactor.CtrlSessionInteractor, connActor interactor.TcpConnInterfactor) controller.CtrlSessionController {
+	ctrlSessionController := controller.NewCtrlSessionController(session, connActor)
+	return ctrlSessionController
 }

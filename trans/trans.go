@@ -16,7 +16,9 @@ func NetTrans() Trans {
 }
 
 func (r *trans) NewAppController() controller.AppController {
-	return controller.AppController{
-		Negotiate: r.NewTcpConnController(),
+	app := controller.AppController{
+		Connect: r.NewTcpConnController(),
 	}
+	app.Negotiation = r.NewCtrlSessionController(app.Connect.GetConnActor())
+	return app
 }

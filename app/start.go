@@ -49,6 +49,6 @@ func (p *Program) ReloadConfig() error {
 }
 
 func (p *Program) OneLoop() error {
-	p.control.Negotiate.NegotiateSocket5()
+	p.control.Negotiation.Negotiate()
 	return nil
 }
