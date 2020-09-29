@@ -12,7 +12,7 @@ type ctrlSessionInteractor struct {
 }
 
 type CtrlSessionInteractor interface {
-	Negotiate(session []model.CtrlSession) (succSession []model.ConnectId, failSession []model.ConnectId)
+	Negotiate(session []model.CtrlSession) (succ, fail []*model.CtrlSession)
 }
 
 func NewCtrlSessionInteractor(r ur.CtrlSessionRepository, p up.CtrlSessionPresenter) CtrlSessionInteractor {
@@ -22,6 +22,6 @@ func NewCtrlSessionInteractor(r ur.CtrlSessionRepository, p up.CtrlSessionPresen
 	}
 }
 
-func (p *ctrlSessionInteractor) Negotiate(session []model.CtrlSession) (succSession []model.ConnectId, failSession []model.ConnectId) {
+func (p *ctrlSessionInteractor) Negotiate(session []model.CtrlSession) (succ, fail []*model.CtrlSession) {
 	return p.presenter.Negotiate(session)
 }

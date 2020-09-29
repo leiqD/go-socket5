@@ -4,12 +4,13 @@ type Addr struct {
 	Atyp    byte
 	Address []byte
 	Port    []byte
+	Host    string
 }
 
 type NegotiationC2S struct {
 	Ver      byte
 	NMethods byte
-	METHODS  byte
+	METHODS  []byte
 }
 
 type NegotiationS2C struct {
@@ -44,4 +45,12 @@ type UdpTransData struct {
 	Frag byte
 	Addr
 	userData []byte
+}
+type AuthenticationC2S struct {
+}
+type AuthenticationS2C struct {
+}
+type Authentication struct {
+	C2S AuthenticationC2S
+	S2C AuthenticationS2C
 }

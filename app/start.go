@@ -50,5 +50,6 @@ func (p *Program) ReloadConfig() error {
 
 func (p *Program) OneLoop() error {
 	p.control.Negotiation.Negotiate()
+	p.control.Trans.Run()
 	return nil
 }

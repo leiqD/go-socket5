@@ -14,9 +14,12 @@ type tcpConnRepository struct {
 
 type TcpConnRepository interface {
 	NewSession(conn net.Conn)
-	GetSession() []model.CtrlSession
+	GetSessionWaitNeg() []model.CtrlSession
 	CloseSession(session model.CtrlSession)
 	CloseByConnectId(connectId model.ConnectId)
+	Update(session *model.CtrlSession)
+	GetSessionTcpWaitTrans() []model.CtrlSession
+	SetSessionSetupTrnas(session *model.CtrlSession)
 }
 
 func NewTcpConnRepository() TcpConnRepository {
@@ -33,12 +36,30 @@ func (p *tcpConnRepository) NewSession(conn net.Conn) {
 	logger.Infof("client add %s accept success", session.GetRemoteAddrContent())
 }
 
-func (p *tcpConnRepository) GetSession() []model.CtrlSession {
+func (p *tcpConnRepository) GetSessionWaitNeg() []model.CtrlSession {
 	p.rwLock.Lock()
 	defer p.rwLock.Unlock()
 	var res []model.CtrlSession
 	for _, session := range p.sessions {
+		if session.GetSetup() != model.SessionSetupAccept {
+			continue
+		}
 		res = append(res, *session)
+	}
+	return res
+}
+
+func (p *tcpConnRepository) GetSessionTcpWaitTrans() []model.CtrlSession {
+	p.rwLock.Lock()
+	defer p.rwLock.Unlock()
+	var res []model.CtrlSession
+	for _, session := range p.sessions {
+		if session.GetProtocol() != model.ProtocolTcp {
+			continue
+		}
+		if session.GetSetup() == model.SessionSetupWaitTrans {
+			res = append(res, *session)
+		}
 	}
 	return res
 }
@@ -61,4 +82,28 @@ func (p *tcpConnRepository) CloseByConnectId(connectId model.ConnectId) {
 	session.CloseConn()
 	logger.Infof("client %s disconnect success", session.GetRemoteAddrContent())
 	delete(p.sessions, session.GetId())
+}
+
+func (p *tcpConnRepository) Update(dst *model.CtrlSession) {
+	p.rwLock.Lock()
+	defer p.rwLock.Unlock()
+	session, ok := p.sessions[dst.GetId()]
+	if !ok {
+		return
+	}
+	session.SetSetup(dst.GetSetup())
+	session.SetDestConn(dst.GetDestConn())
+	session.SetProtocol(dst.GetProtocol())
+	session.Flush()
+}
+
+func (p *tcpConnRepository) SetSessionSetupTrnas(session *model.CtrlSession) {
+	p.rwLock.Lock()
+	defer p.rwLock.Unlock()
+	lsession, ok := p.sessions[session.GetId()]
+	if !ok {
+		return
+	}
+	lsession.SetSetup(model.SessionSetupTrans)
+
 }

@@ -20,5 +20,6 @@ func (r *trans) NewAppController() controller.AppController {
 		Connect: r.NewTcpConnController(),
 	}
 	app.Negotiation = r.NewCtrlSessionController(app.Connect.GetConnActor())
+	app.Trans = r.NetTransferController(app.Connect.GetConnActor())
 	return app
 }

@@ -21,12 +21,15 @@ func NewCtrlSessionController(session interactor.CtrlSessionInteractor, connActo
 }
 
 func (p *ctrlSessionController) Negotiate() {
-	sessions := p.tcpSessionIntractor.GetSession()
+	sessions := p.tcpSessionIntractor.GetSessionWaitNeg()
 	if len(sessions) == 0 {
 		return
 	}
-	_, fail := p.ctrlSessionInteractor.Negotiate(sessions)
-	for _, connectId := range fail {
-		p.tcpSessionIntractor.CloseByConnectId(connectId)
+	succ, fail := p.ctrlSessionInteractor.Negotiate(sessions)
+	for _, session := range fail {
+		p.tcpSessionIntractor.CloseByConnectId(session.GetId())
+	}
+	for _, session := range succ {
+		p.tcpSessionIntractor.UpdateSession(session)
 	}
 }

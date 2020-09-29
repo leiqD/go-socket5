@@ -28,7 +28,10 @@ func (p *negotiation) Parse(fromClient []byte) error {
 	}
 	p.neg.C2s.Ver = fromClient[0]
 	p.neg.C2s.NMethods = fromClient[1]
-	p.neg.C2s.METHODS = fromClient[2]
+	p.neg.C2s.METHODS = make([]byte, p.neg.C2s.NMethods)
+	for i := byte(0); i < p.neg.C2s.NMethods; i++ {
+		p.neg.C2s.METHODS[i] = fromClient[2+1]
+	}
 	logger.Debugf("recv from client %d %d %d", p.neg.C2s.Ver, p.neg.C2s.NMethods, p.neg.C2s.METHODS)
 	return nil
 }
