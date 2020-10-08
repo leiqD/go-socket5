@@ -39,7 +39,7 @@ func InitialTrans() trans.Trans {
 	return nil
 }
 
-func InitialCtrlSessionControl(session interactor.CtrlSessionInteractor, connActor interactor.TcpConnInterfactor) controller.CtrlSessionController {
+func InitialCtrlSessionControl(session interactor.SessionNegInteractor, connActor interactor.TcpConnInterfactor) controller.SessionNegController {
 	wire.Build(controller.NewCtrlSessionController)
 	return nil
 }

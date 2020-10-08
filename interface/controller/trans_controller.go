@@ -6,32 +6,34 @@ import (
 
 type transController struct {
 	tcpTransIneracotr   interactor.TcpTransInteractor
-	tcpSessionIntractor interactor.TcpConnInterfactor
+	sessionNegIntractor interactor.SessionNegInteractor
 }
 
 type TransController interface {
-	Run()
-	Stop()
+	Trans()
 }
 
-func NewTransController(us interactor.TcpTransInteractor, tcpSessionIntractor interactor.TcpConnInterfactor) TransController {
+func NewTransController(us interactor.TcpTransInteractor, sessionNegIntractor interactor.SessionNegInteractor) TransController {
 	return &transController{
 		tcpTransIneracotr:   us,
-		tcpSessionIntractor: tcpSessionIntractor,
+		sessionNegIntractor: sessionNegIntractor,
 	}
 }
 
-func (p *transController) Run() {
-	waitTrans := p.tcpSessionIntractor.GetSessionTcpWaitTrans()
+func (p *transController) Trans() {
+	waitTrans := p.sessionNegIntractor.GetSessionWaitTrans()
 	if len(waitTrans) == 0 {
 		return
 	}
-	p.tcpTransIneracotr.Handle(waitTrans)
 	for _, session := range waitTrans {
-		p.tcpSessionIntractor.SetSessionTrans(&session)
+		p.sessionNegIntractor.RemoveSession(&session)
+		p.tcpTransIneracotr.NewSession(&session)
+		go func() {
+			err := p.tcpTransIneracotr.Handle(&session)
+			if err != nil {
+				p.tcpTransIneracotr.CloseByConnectId(session.GetId())
+				return
+			}
+		}()
 	}
-}
-
-func (p *transController) Stop() {
-
 }

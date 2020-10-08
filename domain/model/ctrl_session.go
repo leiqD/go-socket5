@@ -9,9 +9,10 @@ import (
 type SessionSetup int8
 
 const (
-	SessionSetupAccept = iota + 1
-	SessionSetupWaitTrans
-	SessionSetupTrans
+	SetupAccept = iota + 1
+	SetupNegotiate
+	SetupTrans
+	SetupDoing
 )
 
 type ProtocolType int8
@@ -36,7 +37,7 @@ func NewCtrlSession(conn net.Conn) *CtrlSession {
 		conn:       conn,
 		updateTime: now,
 		id:         ConnectId(idgenerator.GetId()),
-		setup:      SessionSetupAccept,
+		setup:      SetupAccept,
 	}
 	session.conn.SetReadDeadline(time.Now().Add(1000 * time.Second))
 	session.conn.SetWriteDeadline(time.Now().Add(1000 * time.Second))

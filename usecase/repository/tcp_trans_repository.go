@@ -15,7 +15,9 @@ type TcpTransRepository interface {
 	NewSession(session *model.CtrlSession)
 	CloseSession(session model.CtrlSession)
 	CloseByConnectId(connectId model.ConnectId)
-	GetSession() []model.CtrlSession
+	GetAll() []model.CtrlSession
+	GetWithoutDoing() []model.CtrlSession
+	SetDoing(connectId model.ConnectId)
 }
 
 func NewTcpTransRepository() TcpTransRepository {
@@ -29,14 +31,14 @@ func (p *tcpTransRepository) NewSession(session *model.CtrlSession) {
 	defer p.rwLock.Unlock()
 	localSession := *session
 	p.sessions[localSession.GetId()] = &localSession
-	logger.Infof("client add %s accept success", session.GetRemoteAddrContent())
+	logger.Infof("tcpTransRepository:client add %s accept success", session.GetRemoteAddrContent())
 }
 
 func (p *tcpTransRepository) CloseSession(session model.CtrlSession) {
 	p.rwLock.Lock()
 	defer p.rwLock.Unlock()
 	session.CloseConn()
-	logger.Infof("client %s disconnect success", session.GetRemoteAddrContent())
+	logger.Infof("tcpTransRepository:client %s disconnect success", session.GetRemoteAddrContent())
 	delete(p.sessions, session.GetId())
 }
 
@@ -48,11 +50,11 @@ func (p *tcpTransRepository) CloseByConnectId(connectId model.ConnectId) {
 		return
 	}
 	session.CloseConn()
-	logger.Infof("client %s disconnect success", session.GetRemoteAddrContent())
+	logger.Infof("tcpTransRepository:client %s disconnect success", session.GetRemoteAddrContent())
 	delete(p.sessions, session.GetId())
 }
 
-func (p *tcpTransRepository) GetSession() []model.CtrlSession {
+func (p *tcpTransRepository) GetAll() []model.CtrlSession {
 	p.rwLock.Lock()
 	defer p.rwLock.Unlock()
 	var res []model.CtrlSession
@@ -60,4 +62,25 @@ func (p *tcpTransRepository) GetSession() []model.CtrlSession {
 		res = append(res, *session)
 	}
 	return res
+}
+
+func (p *tcpTransRepository) GetWithoutDoing() []model.CtrlSession {
+	p.rwLock.Lock()
+	defer p.rwLock.Unlock()
+	var res []model.CtrlSession
+	for _, session := range p.sessions {
+		if session.GetSetup() == model.SetupDoing {
+			continue
+		}
+		res = append(res, *session)
+	}
+	return res
+}
+
+func (p *tcpTransRepository) SetDoing(connectId model.ConnectId) {
+	p.rwLock.Lock()
+	defer p.rwLock.Unlock()
+	if data, ok := p.sessions[connectId]; ok {
+		data.SetSetup(model.SetupDoing)
+	}
 }

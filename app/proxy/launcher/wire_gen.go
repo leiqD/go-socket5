@@ -47,7 +47,7 @@ func InitialTrans() trans.Trans {
 	return transTrans
 }
 
-func InitialCtrlSessionControl(session interactor.CtrlSessionInteractor, connActor interactor.TcpConnInterfactor) controller.CtrlSessionController {
-	ctrlSessionController := controller.NewCtrlSessionController(session, connActor)
-	return ctrlSessionController
+func InitialCtrlSessionControl(session interactor.SessionNegInteractor, connActor interactor.TcpConnInterfactor) controller.SessionNegController {
+	sessionNegController := controller.NewCtrlSessionController(session, connActor)
+	return sessionNegController
 }

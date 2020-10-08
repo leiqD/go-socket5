@@ -21,7 +21,7 @@ func NewTcpConnController(us interactor.TcpConnInterfactor) TcpConnController {
 }
 
 func (p *tcpConnController) NewSession(conn net.Conn) {
-	p.connInterfactor.Connect(conn)
+	p.connInterfactor.NewSession(conn)
 }
 
 func (p *tcpConnController) GetConnActor() interactor.TcpConnInterfactor {

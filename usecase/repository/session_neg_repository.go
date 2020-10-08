@@ -3,17 +3,16 @@ package repository
 import (
 	"github.com/leiqD/go-socket5/domain/model"
 	"github.com/leiqD/go-socket5/infrastructure/logger"
-	"net"
 	"sync"
 )
 
-type tcpConnRepository struct {
+type ctrlSessionRepository struct {
 	sessions map[model.ConnectId]*model.CtrlSession
 	rwLock   sync.Mutex
 }
 
-type TcpConnRepository interface {
-	NewSession(conn net.Conn)
+type CtrlSessionRepository interface {
+	NewSession(session *model.CtrlSession)
 	GetAll() []model.CtrlSession
 	GetWithoutDoing() []model.CtrlSession
 	CloseSession(session model.CtrlSession)
@@ -22,21 +21,21 @@ type TcpConnRepository interface {
 	SetDoing(connectId model.ConnectId)
 }
 
-func NewTcpConnRepository() TcpConnRepository {
-	return &tcpConnRepository{
-		sessions: make(map[model.ConnectId]*model.CtrlSession),
+func NewCtrlSessionRepository() CtrlSessionRepository {
+	return &ctrlSessionRepository{
+		sessions: map[model.ConnectId]*model.CtrlSession{},
 	}
 }
 
-func (p *tcpConnRepository) NewSession(conn net.Conn) {
+func (p *ctrlSessionRepository) NewSession(session *model.CtrlSession) {
 	p.rwLock.Lock()
 	defer p.rwLock.Unlock()
-	session := model.NewCtrlSession(conn)
+	session.SetSetup(model.SetupNegotiate)
 	p.sessions[session.GetId()] = session
 	logger.Infof("tcpConnRepository:client add %s accept success", session.GetRemoteAddrContent())
 }
 
-func (p *tcpConnRepository) GetAll() []model.CtrlSession {
+func (p *ctrlSessionRepository) GetAll() []model.CtrlSession {
 	p.rwLock.Lock()
 	defer p.rwLock.Unlock()
 	var res []model.CtrlSession
@@ -46,7 +45,7 @@ func (p *tcpConnRepository) GetAll() []model.CtrlSession {
 	return res
 }
 
-func (p *tcpConnRepository) GetWithoutDoing() []model.CtrlSession {
+func (p *ctrlSessionRepository) GetWithoutDoing() []model.CtrlSession {
 	p.rwLock.Lock()
 	defer p.rwLock.Unlock()
 	var res []model.CtrlSession
@@ -59,7 +58,7 @@ func (p *tcpConnRepository) GetWithoutDoing() []model.CtrlSession {
 	return res
 }
 
-func (p *tcpConnRepository) CloseSession(session model.CtrlSession) {
+func (p *ctrlSessionRepository) CloseSession(session model.CtrlSession) {
 	p.rwLock.Lock()
 	defer p.rwLock.Unlock()
 	session.CloseConn()
@@ -67,7 +66,7 @@ func (p *tcpConnRepository) CloseSession(session model.CtrlSession) {
 	delete(p.sessions, session.GetId())
 }
 
-func (p *tcpConnRepository) CloseByConnectId(connectId model.ConnectId) {
+func (p *ctrlSessionRepository) CloseByConnectId(connectId model.ConnectId) {
 	p.rwLock.Lock()
 	defer p.rwLock.Unlock()
 	session, ok := p.sessions[connectId]
@@ -79,13 +78,13 @@ func (p *tcpConnRepository) CloseByConnectId(connectId model.ConnectId) {
 	delete(p.sessions, session.GetId())
 }
 
-func (p *tcpConnRepository) RemoveSession(connectId model.ConnectId) {
+func (p *ctrlSessionRepository) RemoveSession(connectId model.ConnectId) {
 	p.rwLock.Lock()
 	defer p.rwLock.Unlock()
 	delete(p.sessions, connectId)
 }
 
-func (p *tcpConnRepository) SetDoing(connectId model.ConnectId) {
+func (p *ctrlSessionRepository) SetDoing(connectId model.ConnectId) {
 	p.rwLock.Lock()
 	defer p.rwLock.Unlock()
 	if data, ok := p.sessions[connectId]; ok {

@@ -13,13 +13,12 @@ type tcpConnInterfactor struct {
 }
 
 type TcpConnInterfactor interface {
-	Connect(conn net.Conn)
+	NewSession(conn net.Conn)
 	GetSessionWaitNeg() []model.CtrlSession
 	Close(model.CtrlSession)
 	CloseByConnectId(connectId model.ConnectId)
-	UpdateSession(session *model.CtrlSession)
-	GetSessionTcpWaitTrans() []model.CtrlSession
-	SetSessionTrans(session *model.CtrlSession)
+	RemoveSession(session *model.CtrlSession)
+	SetSessionDoing(session *model.CtrlSession)
 }
 
 func NewTcpConnInterfactor(r ur.TcpConnRepository, p up.TcpConnPresenter) TcpConnInterfactor {
@@ -29,16 +28,12 @@ func NewTcpConnInterfactor(r ur.TcpConnRepository, p up.TcpConnPresenter) TcpCon
 	}
 }
 
-func (p *tcpConnInterfactor) Connect(conn net.Conn) {
+func (p *tcpConnInterfactor) NewSession(conn net.Conn) {
 	p.TcpConnReponsitory.NewSession(conn)
 }
 
 func (p *tcpConnInterfactor) GetSessionWaitNeg() []model.CtrlSession {
-	return p.TcpConnReponsitory.GetSessionWaitNeg()
-}
-
-func (p *tcpConnInterfactor) GetSessionTcpWaitTrans() []model.CtrlSession {
-	return p.TcpConnReponsitory.GetSessionTcpWaitTrans()
+	return p.TcpConnReponsitory.GetWithoutDoing()
 }
 
 func (p *tcpConnInterfactor) Close(session model.CtrlSession) {
@@ -49,9 +44,10 @@ func (p *tcpConnInterfactor) CloseByConnectId(connectId model.ConnectId) {
 	p.TcpConnReponsitory.CloseByConnectId(connectId)
 }
 
-func (p *tcpConnInterfactor) UpdateSession(session *model.CtrlSession) {
-	p.TcpConnReponsitory.Update(session)
+func (p *tcpConnInterfactor) RemoveSession(session *model.CtrlSession) {
+	p.TcpConnReponsitory.RemoveSession(session.GetId())
 }
-func (p *tcpConnInterfactor) SetSessionTrans(session *model.CtrlSession) {
-	p.TcpConnReponsitory.SetSessionSetupTrnas(session)
+
+func (p *tcpConnInterfactor) SetSessionDoing(session *model.CtrlSession) {
+	p.TcpConnReponsitory.SetDoing(session.GetId())
 }

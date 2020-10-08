@@ -13,7 +13,10 @@ type tcpTransInteractor struct {
 }
 
 type TcpTransInteractor interface {
-	Handle([]model.CtrlSession) error
+	Handle(session *model.CtrlSession) error
+	NewSession(session *model.CtrlSession)
+	Close(session *model.CtrlSession)
+	CloseByConnectId(connectId model.ConnectId)
 }
 
 func NewTcpTransInteractor(r ur.TcpTransRepository, p up.TcpTransPresenter) TcpTransInteractor {
@@ -23,21 +26,20 @@ func NewTcpTransInteractor(r ur.TcpTransRepository, p up.TcpTransPresenter) TcpT
 	}
 }
 
-func (p *tcpTransInteractor) Handle(sessions []model.CtrlSession) error {
-	for _, session := range sessions {
-		p.reponsitory.NewSession(&session)
-	}
-	for _, session := range sessions {
-		go func() {
-			logger.Infof("%s start tansfer", session.GetRemoteAddrContent())
-			for {
-				if err := p.presenter.Handle(&session); err != nil {
-					logger.Errorf("err=%s", err.Error())
-					p.reponsitory.CloseByConnectId(session.GetId())
-					return
-				}
-			}
-		}()
+func (p *tcpTransInteractor) Handle(session *model.CtrlSession) error {
+	if err := p.presenter.Handle(session); err != nil {
+		logger.Errorf("err=%s", err.Error())
+		return err
 	}
 	return nil
+}
+
+func (p *tcpTransInteractor) NewSession(session *model.CtrlSession) {
+	p.reponsitory.NewSession(session)
+}
+func (p *tcpTransInteractor) Close(session *model.CtrlSession) {
+	p.reponsitory.CloseByConnectId(session.GetId())
+}
+func (p *tcpTransInteractor) CloseByConnectId(connectId model.ConnectId) {
+	p.reponsitory.CloseByConnectId(connectId)
 }

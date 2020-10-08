@@ -7,11 +7,11 @@ import (
 	ur "github.com/leiqD/go-socket5/usecase/repository"
 )
 
-func (r *trans) NewCtrlSessionController(connActor interactor.TcpConnInterfactor) controller.CtrlSessionController {
+func (r *trans) NewCtrlSessionController(connActor interactor.TcpConnInterfactor) controller.SessionNegController {
 	return controller.NewCtrlSessionController(r.NewCtrlSessionInteractor(), connActor)
 }
 
-func (r *trans) NewCtrlSessionInteractor() interactor.CtrlSessionInteractor {
+func (r *trans) NewCtrlSessionInteractor() interactor.SessionNegInteractor {
 	return interactor.NewCtrlSessionInteractor(r.NewCtrlSessionRepository(), r.NewCtrlSessionPresenter())
 }
 

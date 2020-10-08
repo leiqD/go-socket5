@@ -64,7 +64,7 @@ func (p *tcpTransPresenter) client2remote(session *model.CtrlSession) error {
 	if n != wn {
 		//return fmt.Errorf("write buff is full n=%d wn=%d", n, wn)
 	}
-	logger.Infof("client2remote buff n=%d,wn=%d client=%s remote=%s", n, wn, client.RemoteAddr().String(), remote.RemoteAddr().String())
+	logger.Debugf("client2remote buff n=%d,wn=%d client=%s remote=%s", n, wn, client.RemoteAddr().String(), remote.RemoteAddr().String())
 	return nil
 }
 
@@ -85,7 +85,7 @@ func (p *tcpTransPresenter) remote2client(session *model.CtrlSession) error {
 	if n != wn {
 		//return fmt.Errorf("write buff is full n=%d wn=%d", n, wn)
 	}
-	logger.Infof("remote2client buff n=%d,wn=%d remote=%s client=%s", n, wn, remote.RemoteAddr().String(), client.RemoteAddr().String())
+	logger.Debugf("remote2client buff n=%d,wn=%d remote=%s client=%s", n, wn, remote.RemoteAddr().String(), client.RemoteAddr().String())
 
 	return nil
 }

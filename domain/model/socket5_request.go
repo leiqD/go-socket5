@@ -14,6 +14,12 @@ const (
 	DestAddrIpaddrV6 = 4
 )
 
+const (
+	CONNECT       = 1
+	BIND          = 2
+	UDP_ASSOCIATE = 3
+)
+
 type request struct {
 	req entity.Request
 }
@@ -24,6 +30,7 @@ type Request interface {
 	ConnectTcpDst() (conn net.Conn, err error)
 	IsTcp() bool
 	IsUdp() bool
+	Cmd() byte
 }
 
 func NewRequest() Request {
@@ -36,7 +43,6 @@ func (p *request) Parse(fromClient []byte) error {
 	p.req.C2s.Cmd = fromClient[1]
 	p.req.C2s.Rsv = fromClient[2]
 	p.req.C2s.Atyp = fromClient[3]
-	logger.Infof("cmd=%d atyp=%d", p.req.C2s.Cmd, p.req.C2s.Atyp)
 	switch p.req.C2s.Atyp {
 	case DestAddrIpaddrV4:
 		addrLen := byte(4)
@@ -72,11 +78,11 @@ func (p *request) Parse(fromClient []byte) error {
 }
 
 func (p *request) IsTcp() bool {
-	return p.req.C2s.Cmd == 1
+	return p.req.C2s.Cmd == CONNECT
 }
 
 func (p *request) IsUdp() bool {
-	return p.req.C2s.Cmd == 3
+	return p.req.C2s.Cmd == UDP_ASSOCIATE
 }
 
 func (p *request) ConnectTcpDst() (conn net.Conn, err error) {
@@ -99,4 +105,8 @@ func (p *request) Pack() []byte {
 	buff = append(buff, 0)
 	buff = append(buff, 0)
 	return buff
+}
+
+func (p *request) Cmd() byte {
+	return p.req.C2s.Cmd
 }

@@ -1,46 +1,34 @@
 package presenter
 
 import (
+	"fmt"
 	"github.com/leiqD/go-socket5/domain/model"
 	"github.com/leiqD/go-socket5/infrastructure/logger"
-	"sync"
 )
 
 type ctrlSessionPresenter struct {
 }
 
 type CtrlSessionPresenter interface {
-	Negotiate(session []model.CtrlSession) (succ, fail []*model.CtrlSession)
+	Negotiate(session *model.CtrlSession) (succ bool)
 }
 
 func NewCtrlSessionPresenter() CtrlSessionPresenter {
 	return &ctrlSessionPresenter{}
 }
 
-func (p *ctrlSessionPresenter) Negotiate(sessions []model.CtrlSession) (succ, fail []*model.CtrlSession) {
-	logger.Infof("Negotiate has session %d to negotiate", len(sessions))
-	wg := sync.WaitGroup{}
-	for _, session := range sessions {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if err := p.negotiate(&session); err != nil {
-				fail = append(fail, &session)
-				return
-			}
-			if err := p.auth(&session); err != nil {
-				fail = append(fail, &session)
-				return
-			}
-			if err := p.request(&session); err != nil {
-				fail = append(fail, &session)
-				return
-			}
-			succ = append(succ, &session)
-		}()
+func (p *ctrlSessionPresenter) Negotiate(session *model.CtrlSession) (succ bool) {
+	//logger.Infof("Negotiate has session %d to negotiate", len(sessions))
+	if err := p.negotiate(session); err != nil {
+		return false
 	}
-	wg.Wait()
-	return
+	if err := p.auth(session); err != nil {
+		return false
+	}
+	if err := p.request(session); err != nil {
+		return false
+	}
+	return true
 }
 
 func (p *ctrlSessionPresenter) negotiate(session *model.CtrlSession) error {
@@ -95,36 +83,44 @@ func (p *ctrlSessionPresenter) request(session *model.CtrlSession) error {
 		logger.Errorf("request read error=%v", err)
 		return err
 	}
+	cmd := req.Cmd()
+	switch cmd {
+	default:
+		return fmt.Errorf("undefine cmd")
+	case model.CONNECT:
+		logger.Infof("cmd=%d:connect", cmd)
+		return p.connect(session, req)
+	case model.BIND:
+		logger.Infof("cmd=%d:bind", cmd)
+		return p.bind(session, req)
+	case model.UDP_ASSOCIATE:
+		logger.Infof("cmd=%d:udp associate", cmd)
+		return p.udpAssociate(session, req)
+	}
+	return nil
+}
+
+func (p *ctrlSessionPresenter) connect(session *model.CtrlSession, req model.Request) error {
 	conn, err := req.ConnectTcpDst()
 	if conn == nil || err != nil {
 		logger.Infof("connect remote dst addr fail %s", err.Error())
 		return err
 	}
 	logger.Infof("connect remote dst addr success")
-	if req.IsTcp() {
-		session.SetProtocol(model.ProtocolTcp)
-	}
-	if req.IsUdp() {
-		session.SetProtocol(model.ProtocolUdp)
-	}
+	session.SetProtocol(model.ProtocolTcp)
 	session.SetDestConn(conn)
-	session.SetSetup(model.SessionSetupWaitTrans)
-	n, err = session.GetConn().Write(req.Pack())
+	n, err := session.GetConn().Write(req.Pack())
 	if n != 2 || err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p *ctrlSessionPresenter) connect(session *model.CtrlSession) error {
-
-	return nil
+func (p *ctrlSessionPresenter) bind(session *model.CtrlSession, req model.Request) error {
+	return fmt.Errorf("not support bind")
 }
 
-func (p *ctrlSessionPresenter) bind(session *model.CtrlSession) error {
-	return nil
-}
-
-func (p *ctrlSessionPresenter) udpAssociate(session *model.CtrlSession) error {
+func (p *ctrlSessionPresenter) udpAssociate(session *model.CtrlSession, req model.Request) error {
+	session.SetProtocol(model.ProtocolUdp)
 	return nil
 }

@@ -7,8 +7,8 @@ import (
 	ur "github.com/leiqD/go-socket5/usecase/repository"
 )
 
-func (r *trans) NetTransferController(connActor interactor.TcpConnInterfactor) controller.TransController {
-	return controller.NewTransController(r.NewTransferInteractor(), connActor)
+func (r *trans) NetTransferController(sessionNegActor interactor.SessionNegInteractor) controller.TransController {
+	return controller.NewTransController(r.NewTransferInteractor(), sessionNegActor)
 }
 
 func (r *trans) NewTransferInteractor() interactor.TcpTransInteractor {
