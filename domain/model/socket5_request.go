@@ -27,10 +27,12 @@ type request struct {
 type Request interface {
 	Parse(fromClient []byte) error
 	Pack() []byte
+	PackUdp(ip []byte) []byte
 	ConnectTcpDst() (conn net.Conn, err error)
 	IsTcp() bool
 	IsUdp() bool
 	Cmd() byte
+	Port() int64
 }
 
 func NewRequest() Request {
@@ -109,4 +111,24 @@ func (p *request) Pack() []byte {
 
 func (p *request) Cmd() byte {
 	return p.req.C2s.Cmd
+}
+
+func (p *request) Port() int64 {
+	port := int64(binary.BigEndian.Uint16(p.req.C2s.Port))
+	return port
+}
+
+func (p *request) PackUdp(ip []byte) []byte {
+	buff := []byte{}
+	buff = append(buff, 5)
+	buff = append(buff, 0)
+	buff = append(buff, 0)
+	buff = append(buff, 1)
+	buff = append(buff, ip[0])
+	buff = append(buff, ip[1])
+	buff = append(buff, ip[2])
+	buff = append(buff, ip[3])
+	buff = append(buff, p.req.C2s.Port[0])
+	buff = append(buff, p.req.C2s.Port[1])
+	return buff
 }

@@ -38,8 +38,8 @@ func (p *sessionNegController) Negotiate() {
 				p.tcpSessionIntractor.CloseByConnectId(session.GetId())
 				return
 			}
-			p.tcpSessionIntractor.RemoveSession(&session)
 			p.sessionNegInteractor.NewSession(&session)
+			p.tcpSessionIntractor.RemoveSession(&session)
 		}()
 	}
 }

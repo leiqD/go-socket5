@@ -21,7 +21,20 @@ func NewtcpTransPresenter() TcpTransPresenter {
 }
 
 func (p *tcpTransPresenter) Handle(session *model.CtrlSession) error {
+	switch session.GetProtocol() {
+	case model.ProtocolTcp:
+		return p.HandleTcp(session)
+	case model.ProtocolUdp:
+		return fmt.Errorf("udp not define")
+	default:
+		return fmt.Errorf("udp not define %d", session.GetProtocol())
+	}
+}
 
+func (p *tcpTransPresenter) HandleTcp(session *model.CtrlSession) error {
+	//addr := session.GetRemoteAddrContent()
+	//logger.Infof("%s enter tcpTransPresenter", addr)
+	//defer logger.Infof("%s leave tcpTransPresenter", addr)
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() error {

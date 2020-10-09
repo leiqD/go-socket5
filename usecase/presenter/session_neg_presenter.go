@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/leiqD/go-socket5/domain/model"
 	"github.com/leiqD/go-socket5/infrastructure/logger"
+	"net"
 )
 
 type ctrlSessionPresenter struct {
@@ -122,5 +123,22 @@ func (p *ctrlSessionPresenter) bind(session *model.CtrlSession, req model.Reques
 
 func (p *ctrlSessionPresenter) udpAssociate(session *model.CtrlSession, req model.Request) error {
 	session.SetProtocol(model.ProtocolUdp)
+	port := req.Port()
+	addr := fmt.Sprintf("192.168.1.4:%d", port)
+	udp_addr, err := net.ResolveUDPAddr("udp", addr)
+	if err != nil {
+		return err
+	}
+
+	conn, err := net.ListenUDP("udp", udp_addr)
+	if err != nil {
+		logger.Errorf("%s", err.Error())
+		return err
+	}
+	session.SetDestConn(conn)
+	n, err := session.GetConn().Write(req.PackUdp(udp_addr.IP.To4()))
+	if n == 0 || err != nil {
+		return err
+	}
 	return nil
 }

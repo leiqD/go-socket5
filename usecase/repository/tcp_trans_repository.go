@@ -31,7 +31,7 @@ func (p *tcpTransRepository) NewSession(session *model.CtrlSession) {
 	defer p.rwLock.Unlock()
 	localSession := *session
 	p.sessions[localSession.GetId()] = &localSession
-	logger.Infof("tcpTransRepository:client add %s accept success", session.GetRemoteAddrContent())
+	logger.Infof("tcpTransRepository:client add %s accept success protocol %d", session.GetRemoteAddrContent(), session.GetProtocol())
 }
 
 func (p *tcpTransRepository) CloseSession(session model.CtrlSession) {
